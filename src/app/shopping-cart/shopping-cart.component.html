@@ -46,28 +46,28 @@
       </div>
       <div class="summary-row">
         <span>Subtotal:</span>
-        <span>\${{ cartSummary.totalPrice.toFixed(2) }}</span>
+        <span>${{ cartSummary.totalPrice.toFixed(2) }}</span>
       </div>
       <div
         class="summary-row discount"
         *ngIf="cartSummary.membershipDiscount > 0"
       >
         <span>Membership Discount:</span>
-        <span>-\${{ cartSummary.membershipDiscount.toFixed(2) }}</span>
+        <span>-${{ cartSummary.membershipDiscount.toFixed(2) }}</span>
       </div>
       <div class="summary-row discount" *ngIf="cartSummary.appliedCoupon">
         <span>Coupon ({{ cartSummary.appliedCoupon.code }}):</span>
-        <span>-\${{ getCouponDiscount().toFixed(2) }}</span>
+        <span>-${{ getCouponDiscount().toFixed(2) }}</span>
       </div>
       <div class="summary-row total">
         <span><strong>Total:</strong></span>
         <span
-          ><strong>\${{ cartSummary.discountedPrice.toFixed(2) }}</strong></span
+          ><strong>${{ cartSummary.discountedPrice.toFixed(2) }}</strong></span
         >
       </div>
       <div class="summary-row">
         <span>Tax (8%):</span>
-        <span>\${{ cartSummary.estimatedTax.toFixed(2) }}</span>
+        <span>${{ cartSummary.estimatedTax.toFixed(2) }}</span>
       </div>
       <div class="summary-row">
         <span>Shipping:</span>
@@ -80,7 +80,7 @@
       <div class="summary-row final-total">
         <span><strong>Final Total:</strong></span>
         <span
-          ><strong>\${{ getFinalTotal().toFixed(2) }}</strong></span
+          ><strong>${{ getFinalTotal().toFixed(2) }}</strong></span
         >
       </div>
     </div>
@@ -94,7 +94,7 @@
       <div *ngFor="let item of cartSummary.items" class="cart-item">
         <div class="item-info">
           <span class="item-name">{{ item.product.name }}</span>
-          <span class="item-price">\${{ item.product.price }}</span>
+          <span class="item-price">${{ item.product.price }}</span>
           <span *ngIf="item.product.discount" class="item-discount">
             {{ item.product.discount }}% OFF
           </span>
