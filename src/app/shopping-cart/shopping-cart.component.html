@@ -1,24 +1,44 @@
-<div class="shopping-cart">
+<div class="shopping-cart p-4">
   <!-- Notifications -->
-  <div *ngIf="notification" [class]="'notification ' + notification.type">
+  <div
+    *ngIf="notification"
+    [class]="
+      'alert alert-' +
+      (notification.type === 'success'
+        ? 'success'
+        : notification.type === 'error'
+        ? 'danger'
+        : notification.type === 'warning'
+        ? 'warning'
+        : 'info') +
+      ' notification ' +
+      notification.type
+    "
+    role="alert"
+  >
     {{ notification.message }}
   </div>
 
   <!-- Cart Value Alerts -->
-  <div *ngIf="cartValueAlert" class="alert">{{ cartValueAlert }}</div>
+  <div *ngIf="cartValueAlert" class="alert alert-warning" role="alert">
+    {{ cartValueAlert }}
+  </div>
 
   <!-- Cart Expiry Warning -->
-  <div *ngIf="cartExpiryWarning" class="warning">{{ cartExpiryWarning }}</div>
+  <div *ngIf="cartExpiryWarning" class="alert alert-danger" role="alert">
+    {{ cartExpiryWarning }}
+  </div>
 
   <!-- User Section -->
-  <div class="user-section">
-    <div *ngIf="user; else loginSection">
-      <h3>Welcome {{ user.name }}!</h3>
-      <p>
+  <div class="card mb-4">
+    <div class="card-body" *ngIf="user; else loginSection">
+      <h3 class="card-title">Welcome {{ user.name }}!</h3>
+      <p class="mb-3">
         Membership Level:
         <span
-          class="membership-badge"
-          [class]="'membership-' + user.membershipLevel"
+          class="badge rounded-pill membership-{{
+            user.membershipLevel
+          }} text-white ms-2"
         >
           {{ user.membershipLevel | titlecase }}
         </span>
@@ -26,206 +46,237 @@
       <button (click)="logout()" class="btn btn-secondary">Logout</button>
     </div>
     <ng-template #loginSection>
-      <h3>Login to get member benefits</h3>
-      <div class="login-buttons">
-        <button (click)="loginAsMember('bronze')" class="btn btn-bronze">
-          Bronze Member
-        </button>
-        <button (click)="loginAsMember('silver')" class="btn btn-silver">
-          Silver Member
-        </button>
-        <button (click)="loginAsMember('gold')" class="btn btn-gold">
-          Gold Member
-        </button>
+      <div class="card-body">
+        <h3 class="card-title">Login to get member benefits</h3>
+        <div class="d-flex gap-2 flex-wrap">
+          <button
+            (click)="loginAsMember('bronze')"
+            class="btn membership-bronze text-white"
+          >
+            Bronze Member
+          </button>
+          <button
+            (click)="loginAsMember('silver')"
+            class="btn membership-silver text-dark"
+          >
+            Silver Member
+          </button>
+          <button (click)="loginAsMember('gold')" class="btn membership-gold">
+            Gold Member
+          </button>
+        </div>
       </div>
     </ng-template>
   </div>
 
   <!-- Main Content Area -->
-  <div class="main-content">
+  <div class="row main-content">
     <!-- Left Column: Cart Summary & Items -->
-    <div class="cart-column">
+    <div class="col-lg-6 d-flex flex-column gap-4">
       <!-- Cart Summary -->
-      <div class="cart-summary">
-        <h3>Cart Summary</h3>
-        <div class="summary-content">
-          <div class="summary-row">
-            <span>Items:</span>
-            <span>{{ cartSummary.totalItems }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Subtotal:</span>
-            <span>${{ cartSummary.totalPrice.toFixed(2) }}</span>
-          </div>
-          <div
-            class="summary-row discount"
-            *ngIf="cartSummary.membershipDiscount > 0"
-          >
-            <span>Membership Discount:</span>
-            <span>-${{ cartSummary.membershipDiscount.toFixed(2) }}</span>
-          </div>
-          <div class="summary-row discount" *ngIf="cartSummary.appliedCoupon">
-            <span>Coupon ({{ cartSummary.appliedCoupon.code }}):</span>
-            <span>-${{ getCouponDiscount().toFixed(2) }}</span>
-          </div>
-          <div class="summary-row total">
-            <span><strong>Total:</strong></span>
-            <span
-              ><strong
-                >${{ cartSummary.discountedPrice.toFixed(2) }}</strong
-              ></span
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Cart Summary</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item d-flex justify-content-between">
+              <span>Items:</span>
+              <span>{{ cartSummary.totalItems }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span>Subtotal:</span>
+              <span>${{ cartSummary.totalPrice.toFixed(2) }}</span>
+            </div>
+            <div
+              class="list-group-item d-flex justify-content-between text-success"
+              *ngIf="cartSummary.membershipDiscount > 0"
             >
-          </div>
-          <div class="summary-row">
-            <span>Tax (8%):</span>
-            <span>${{ cartSummary.estimatedTax.toFixed(2) }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Shipping:</span>
-            <span>{{
-              cartSummary.shippingCost === 0
-                ? "FREE"
-                : cartSummary.items.length > 0
-                ? "$" + cartSummary.shippingCost.toFixed(2)
-                : "$0.00"
-            }}</span>
-          </div>
-          <div class="summary-row final-total">
-            <span><strong>Final Total:</strong></span>
-            <span
-              ><strong>${{ getFinalTotal().toFixed(2) }}</strong></span
+              <span>Membership Discount:</span>
+              <span>-${{ cartSummary.membershipDiscount.toFixed(2) }}</span>
+            </div>
+            <div
+              class="list-group-item d-flex justify-content-between text-success"
+              *ngIf="cartSummary.appliedCoupon"
             >
+              <span>Coupon ({{ cartSummary.appliedCoupon.code }}):</span>
+              <span>-${{ getCouponDiscount().toFixed(2) }}</span>
+            </div>
+            <div
+              class="list-group-item d-flex justify-content-between fw-bold border-top"
+            >
+              <span>Total:</span>
+              <span>${{ cartSummary.discountedPrice.toFixed(2) }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span>Tax (8%):</span>
+              <span>${{ cartSummary.estimatedTax.toFixed(2) }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+              <span>Shipping:</span>
+              <span>{{
+                cartSummary.shippingCost === 0
+                  ? "FREE"
+                  : cartSummary.items.length > 0
+                  ? "$" + cartSummary.shippingCost.toFixed(2)
+                  : "$0.00"
+              }}</span>
+            </div>
+            <div
+              class="summary-row final-total d-flex justify-content-between fw-bold"
+            >
+              <span>Final Total:</span>
+              <span>${{ getFinalTotal().toFixed(2) }}</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Cart Items -->
-      <div class="cart-items">
-        <h3>Cart Items ({{ cartSummary.totalItems }})</h3>
-        <div class="cart-items-content">
-          <div *ngIf="cartSummary.items.length === 0" class="empty-cart">
-            <div class="empty-cart-icon">🛒</div>
-            <p>Your cart is empty</p>
-            <span>Add some products to get started!</span>
+      <div class="card flex-fill">
+        <div class="card-header">
+          <h3 class="mb-0">Cart Items ({{ cartSummary.totalItems }})</h3>
+        </div>
+        <div class="card-body cart-items-content">
+          <div
+            *ngIf="cartSummary.items.length === 0"
+            class="text-center text-muted py-5"
+          >
+            <div class="empty-cart-icon mb-3">🛒</div>
+            <p class="fs-5 fw-bold mb-2">Your cart is empty</p>
+            <span class="fst-italic">Add some products to get started!</span>
           </div>
-          <div *ngFor="let item of cartSummary.items" class="cart-item">
-            <div class="item-info">
-              <span class="item-name">{{ item.product.name }}</span>
-              <span class="item-price">${{ item.product.price }}</span>
-              <span *ngIf="item.product.discount" class="item-discount">
-                {{ item.product.discount }}% OFF
-              </span>
-            </div>
-            <div class="item-controls">
-              <div class="quantity-control">
+          <div *ngFor="let item of cartSummary.items" class="card mb-3">
+            <div
+              class="card-body d-flex justify-content-between align-items-center"
+            >
+              <div class="flex-fill">
+                <h6 class="card-title mb-1">{{ item.product.name }}</h6>
+                <p class="text-primary fw-bold mb-1">
+                  ${{ item.product.price }}
+                </p>
+                <span *ngIf="item.product.discount" class="badge bg-danger">
+                  {{ item.product.discount }}% OFF
+                </span>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <div class="quantity-control d-flex align-items-center">
+                  <button
+                    (click)="
+                      updateQuantity(
+                        item.product.id,
+                        (item.quantity - 1).toString()
+                      )
+                    "
+                    [disabled]="item.quantity <= 1"
+                    class="btn-quantity"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    [value]="item.quantity"
+                    (change)="
+                      updateQuantity(item.product.id, $any($event.target).value)
+                    "
+                    min="1"
+                    class="quantity-input form-control-sm"
+                  />
+                  <button
+                    (click)="
+                      updateQuantity(
+                        item.product.id,
+                        (item.quantity + 1).toString()
+                      )
+                    "
+                    class="btn-quantity"
+                  >
+                    +
+                  </button>
+                </div>
                 <button
-                  (click)="
-                    updateQuantity(
-                      item.product.id,
-                      (item.quantity - 1).toString()
-                    )
-                  "
-                  [disabled]="item.quantity <= 1"
-                  class="btn btn-quantity"
+                  (click)="removeFromCart(item.product.id)"
+                  class="btn btn-danger btn-sm"
                 >
-                  -
-                </button>
-                <input
-                  type="number"
-                  [value]="item.quantity"
-                  (change)="
-                    updateQuantity(item.product.id, $any($event.target).value)
-                  "
-                  min="1"
-                  class="quantity-input"
-                />
-                <button
-                  (click)="
-                    updateQuantity(
-                      item.product.id,
-                      (item.quantity + 1).toString()
-                    )
-                  "
-                  class="btn btn-quantity"
-                >
-                  +
+                  Remove
                 </button>
               </div>
-              <button
-                (click)="removeFromCart(item.product.id)"
-                class="btn btn-remove"
-              >
-                Remove
-              </button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Coupon Section -->
-      <div class="coupon-section">
-        <h3>Coupons & Discounts</h3>
-        <div class="coupon-input">
-          <input
-            #couponInput
-            placeholder="Enter coupon code"
-            class="coupon-field"
-          />
-          <button
-            (click)="applyCoupon(couponInput.value)"
-            [disabled]="cartSummary.isLoading"
-            class="btn btn-apply-coupon"
-          >
-            Apply
-          </button>
-          <button
-            *ngIf="cartSummary.appliedCoupon"
-            (click)="removeCoupon()"
-            class="btn btn-remove-coupon"
-          >
-            Remove
-          </button>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Coupons & Discounts</h3>
         </div>
-
-        <div
-          class="recommended-coupons"
-          *ngIf="cartSummary.recommendedCoupons.length > 0"
-        >
-          <h4>Recommended for you:</h4>
-          <div
-            *ngFor="let coupon of cartSummary.recommendedCoupons"
-            class="coupon-recommendation"
-          >
-            <div class="coupon-details">
-              <span class="coupon-code">{{ coupon.code }}</span>
-              <span class="coupon-benefit"
-                >{{ coupon.discountPercent }}% off</span
-              >
-              <span class="coupon-min">Min: ${{ coupon.minAmount }}</span>
-            </div>
+        <div class="card-body">
+          <div class="input-group mb-3">
+            <input
+              #couponInput
+              placeholder="Enter coupon code"
+              class="form-control"
+            />
             <button
-              (click)="applyCoupon(coupon.code)"
-              class="btn btn-quick-apply"
+              (click)="applyCoupon(couponInput.value)"
+              [disabled]="cartSummary.isLoading"
+              class="btn btn-success"
             >
               Apply
             </button>
+            <button
+              *ngIf="cartSummary.appliedCoupon"
+              (click)="removeCoupon()"
+              class="btn btn-warning"
+            >
+              Remove
+            </button>
+          </div>
+
+          <div *ngIf="cartSummary.recommendedCoupons.length > 0">
+            <h6 class="text-muted mb-3">Recommended for you:</h6>
+            <div
+              *ngFor="let coupon of cartSummary.recommendedCoupons"
+              class="card mb-2"
+            >
+              <div
+                class="card-body d-flex justify-content-between align-items-center p-3"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <span class="badge coupon-code fw-bold">{{
+                    coupon.code
+                  }}</span>
+                  <span class="text-success fw-bold"
+                    >{{ coupon.discountPercent }}% off</span
+                  >
+                  <small class="text-muted">Min: ${{ coupon.minAmount }}</small>
+                </div>
+                <button
+                  (click)="applyCoupon(coupon.code)"
+                  class="btn btn-info btn-sm"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="actions">
+      <div class="d-flex gap-3 justify-content-center">
         <button
           (click)="clearCart()"
           [disabled]="cartSummary.totalItems === 0"
-          class="btn btn-clear"
+          class="btn btn-danger"
         >
           Clear Cart
         </button>
         <button
           (click)="checkout()"
           [disabled]="!cartSummary.canCheckout"
-          class="btn btn-checkout"
+          class="btn btn-primary btn-lg"
         >
           Checkout - ${{ getFinalTotal().toFixed(2) }}
         </button>
@@ -233,28 +284,36 @@
     </div>
 
     <!-- Right Column: Products -->
-    <div class="products-column">
-      <div class="products-header">
-        <h3>Available Products</h3>
-      </div>
-      <div class="products-grid">
-        <div *ngFor="let product of products" class="product-card">
-          <div class="product-info">
-            <h4>{{ product.name }}</h4>
-            <p class="product-category">{{ product.category }}</p>
-            <div class="price-section">
-              <span class="price">${{ product.price }}</span>
-              <span *ngIf="product.discount" class="discount-badge">
-                {{ product.discount }}% OFF
-              </span>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header border-bottom">
+          <h3 class="mb-0">Available Products</h3>
+        </div>
+        <div class="card-body products-grid p-3">
+          <div *ngFor="let product of products" class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title">{{ product.name }}</h6>
+              <p class="card-text text-muted text-uppercase small mb-3">
+                {{ product.category }}
+              </p>
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <span class="h5 text-primary fw-bold mb-0"
+                  >${{ product.price }}</span
+                >
+                <span *ngIf="product.discount" class="badge bg-danger"
+                  >{{ product.discount }}% OFF</span
+                >
+              </div>
+              <button
+                (click)="addToCart(product)"
+                [disabled]="cartSummary.isLoading || !product.inStock"
+                class="btn btn-primary mt-auto"
+              >
+                {{ product.inStock ? "Add to Cart" : "Out of Stock" }}
+              </button>
             </div>
-            <button
-              (click)="addToCart(product)"
-              [disabled]="cartSummary.isLoading || !product.inStock"
-              class="btn btn-add-cart"
-            >
-              {{ product.inStock ? "Add to Cart" : "Out of Stock" }}
-            </button>
           </div>
         </div>
       </div>
