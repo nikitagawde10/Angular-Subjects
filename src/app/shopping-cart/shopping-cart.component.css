@@ -211,24 +211,6 @@
   padding-right: 8px;
 }
 
-.cart-items-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cart-items-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.cart-items-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.cart-items-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
 .empty-cart {
   text-align: center;
   color: #6c757d;
@@ -744,85 +726,10 @@
   }
 }
 
-/* Loading States */
-.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.loading::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #007bff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 /* Accessibility */
 .btn:focus,
 .coupon-field:focus,
 .quantity-input:focus {
   outline: 2px solid #007bff;
   outline-offset: 2px;
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .shopping-cart {
-    background: #1a1a1a;
-    color: #ffffff;
-  }
-
-  .user-section,
-  .cart-summary,
-  .cart-items,
-  .products-column {
-    background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
-    border-color: #555;
-  }
-
-  .coupon-section {
-    background: linear-gradient(135deg, #404040 0%, #555 100%);
-  }
-
-  .cart-item,
-  .product-card,
-  .coupon-recommendation {
-    background: #2d2d2d;
-    border-color: #555;
-  }
-
-  .summary-row {
-    border-color: #555;
-  }
-
-  .item-name,
-  .user-section h3,
-  .cart-summary h3,
-  .cart-items h3,
-  .coupon-section h3,
-  .products-header h3,
-  .product-info h4 {
-    color: #ffffff;
-  }
-
-  .product-category,
-  .coupon-min {
-    color: #aaa;
-  }
 }
