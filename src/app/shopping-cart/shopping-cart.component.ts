@@ -122,7 +122,8 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
     );
   }
 
-  checkout() {
+  // Checkout action
+  checkout(): void {
     const finalTotal = this.getFinalTotal();
     this.notificationService.showSuccess(
       `Order placed successfully! Total: $${finalTotal.toFixed(2)}`,
@@ -131,7 +132,7 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
     this.cartService.clearCart();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -17,6 +17,7 @@ export class UserService {
 
   setUser(user: User): void {
     this.userSubject.next(user);
+    console.log('User logged in', { user });
     this.saveUserToStorage(user);
   }
 

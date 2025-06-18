@@ -21,7 +21,7 @@ export class NotificationService {
   showNotification(
     message: string,
     type: 'success' | 'error' | 'warning' | 'info' = 'info',
-    duration: number = 3000
+    duration: number = 5000
   ): void {
     const notification: NotificationMessage = {
       message,

@@ -107,6 +107,14 @@ export class CartService {
       item.product.id === productId ? { ...item, quantity } : item
     );
     this.updateCartState(updated);
+    const updatedProduct = updated.find(
+      (i) => i.product.id === productId
+    )?.product;
+    if (updatedProduct) {
+      this.notificationService.showSuccess(
+        `Updated ${updatedProduct.name} quantity to ${quantity}`
+      );
+    }
   }
 
   clearCart(): void {
