@@ -25,12 +25,28 @@ import { FormsModule } from '@angular/forms';
 export class ShoppingCartComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  cartSummary: CartSummary = {} as CartSummary;
+  // Initialize with default values to prevent undefined issues
+  cartSummary: CartSummary = {
+    items: [],
+    totalItems: 0,
+    totalPrice: 0,
+    membershipDiscount: 0,
+    discountedPrice: 0,
+    estimatedTax: 0,
+    shippingCost: 0,
+    appliedCoupon: undefined,
+    recommendedCoupons: [],
+    canCheckout: false,
+    isLoading: false,
+    lastUpdated: new Date(),
+  };
+
   user: User | null = null;
   notification: NotificationMessage | null = null;
   cartValueAlert = '';
   cartExpiryWarning = '';
   products: Product[] = sampleProducts;
+
   constructor(
     private cartService: CartService,
     private userService: UserService,
@@ -42,7 +58,10 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
     // Subscribe to all observables
     this.cartService.cartSummary$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((summary) => (this.cartSummary = summary));
+      .subscribe((summary) => {
+        this.cartSummary = summary;
+        console.log('Cart summary updated:', summary); // Debug log
+      });
 
     this.userService.user$
       .pipe(takeUntil(this.destroy$))
@@ -50,7 +69,10 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
 
     this.notificationService.notification$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((notification) => (this.notification = notification));
+      .subscribe((notification) => {
+        this.notification = notification;
+        console.log('Notification received:', notification);
+      });
 
     this.notificationService.cartValueAlert$
       .pipe(takeUntil(this.destroy$))
@@ -72,7 +94,9 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
 
   updateQuantity(productId: number, quantity: string) {
     const numQuantity = parseInt(quantity) || 0;
-    this.cartService.updateQuantity(productId, numQuantity);
+    if (numQuantity > 0) {
+      this.cartService.updateQuantity(productId, numQuantity);
+    }
   }
 
   clearCart() {
@@ -122,14 +146,59 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Checkout action
+  // Enhanced checkout action with better error handling
   checkout(): void {
-    const finalTotal = this.getFinalTotal();
-    this.notificationService.showSuccess(
-      `Order placed successfully! Total: $${finalTotal.toFixed(2)}`,
-      5000
-    );
-    this.cartService.clearCart();
+    console.log('Checkout clicked!'); // Debug log
+    console.log('Cart can checkout:', this.cartSummary.canCheckout); // Debug log
+    console.log('Cart summary before checkout:', this.cartSummary); // Debug log
+
+    // Check if cart is empty
+    if (!this.cartSummary.items || this.cartSummary.items.length === 0) {
+      this.notificationService.showError('Your cart is empty!');
+      return;
+    }
+
+    // Check if checkout is allowed
+    if (!this.cartSummary.canCheckout) {
+      this.notificationService.showError('Unable to checkout at this time.');
+      return;
+    }
+
+    try {
+      // Calculate final total BEFORE clearing cart
+      const finalTotal = this.getFinalTotal();
+      console.log('Final total calculated:', finalTotal); // Debug log
+
+      // Clear the cart FIRST
+      this.cartService.clearCart();
+
+      // Show success notification AFTER clearing cart
+      this.notificationService.showSuccess(
+        `Order placed successfully! Total: ${finalTotal.toFixed(2)}`,
+        5000
+      );
+
+      console.log('Success notification called with total:', finalTotal); // Debug log
+    } catch (error) {
+      console.error('Checkout error:', error);
+      this.notificationService.showError('An error occurred during checkout.');
+    }
+  }
+
+  // Alternative checkout method for debugging
+  debugCheckout(): void {
+    console.log('Debug checkout called');
+    this.notificationService.showSuccess('Debug notification test!', 3000);
+  }
+
+  // Test notification methods
+  testNotification(): void {
+    console.log('Testing notification service...');
+    this.notificationService.showSuccess('Test notification working!', 3000);
+  }
+
+  testError(): void {
+    this.notificationService.showError('Test error notification!', 3000);
   }
 
   ngOnDestroy(): void {
