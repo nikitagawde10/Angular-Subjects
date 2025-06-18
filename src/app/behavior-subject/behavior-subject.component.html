@@ -1,0 +1,30 @@
+<div class="container">
+  <h1>Behavior Subject</h1>
+
+  <!-- Add new todo -->
+  <div class="mb-3 w-25 d-flex align-items-center">
+    <input
+      [(ngModel)]="newTitle"
+      placeholder="New todo title"
+      class="form-control"
+    />
+    <button (click)="addItem()" class="btn btn-primary mt-2">Add</button>
+  </div>
+
+  <!-- List and edit existing todos -->
+  <ul class="list-group">
+    <li
+      class="list-group-item d-flex align-items-center w-25"
+      *ngFor="let item of itemList"
+    >
+      <input
+        [(ngModel)]="item.title"
+        (blur)="updateItem(item.id, item.title)"
+        class="form-control me-2"
+      />
+      <button (click)="removeItem(item.id)" class="btn btn-sm btn-danger">
+        Delete
+      </button>
+    </li>
+  </ul>
+</div>
