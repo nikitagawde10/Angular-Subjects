@@ -14,4 +14,4 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 ## To view the website
 
-`https://angularsubjects.netlify.app/behavior`
+`https://angularsubjects.netlify.app`
