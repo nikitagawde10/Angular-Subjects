@@ -6,14 +6,13 @@ import {
   distinctUntilChanged,
   tap,
   catchError,
-  finalize,
 } from 'rxjs/operators';
 import {
   CartState,
   CartItem,
   Product,
   CartSummary,
-} from '../shopping-cart.models';
+} from '../shopping-cart.utils';
 import { UserService } from './user.service';
 import { CouponService, CouponValidationResult } from './coupon.service';
 import { NotificationService } from './notification.service';
@@ -39,7 +38,6 @@ export class CartService {
     private notificationService: NotificationService
   ) {
     this.initializeCartMonitoring();
-    this.loadCartFromStorage();
 
     // Initialize cartSummary$ after services are assigned
     this.cartSummary$ = combineLatest([
@@ -73,29 +71,24 @@ export class CartService {
   }
 
   // ----- CART OPERATIONS -----
+  addToCart(product: Product, quantity = 1): void {
+    const items = this.cartStateSubject.value.items;
+    const existingIndex = items.findIndex((i) => i.product.id === product.id);
 
-  addToCart(product: Product, quantity: number = 1): void {
-    this.setLoading(true);
-    setTimeout(() => {
-      const { items } = this.cartStateSubject.value;
-      const idx = items.findIndex((i) => i.product.id === product.id);
-      let updated: CartItem[];
-      if (idx >= 0) {
-        updated = [...items];
-        updated[idx] = {
-          ...updated[idx],
-          quantity: updated[idx].quantity + quantity,
-        };
-        this.notificationService.showSuccess(
-          `Updated ${product.name} quantity in cart`
-        );
-      } else {
-        updated = [...items, { product, quantity, addedAt: new Date() }];
-        this.notificationService.showSuccess(`Added ${product.name} to cart`);
-      }
-      this.updateCartState(updated);
-      this.setLoading(false);
-    }, 500);
+    let updatedItems: CartItem[];
+    if (existingIndex >= 0) {
+      updatedItems = [...items];
+      updatedItems[existingIndex] = {
+        ...updatedItems[existingIndex],
+        quantity: updatedItems[existingIndex].quantity + quantity,
+      };
+      this.notificationService.showSuccess(`Updated ${product.name} quantity`);
+    } else {
+      updatedItems = [...items, { product, quantity, addedAt: new Date() }];
+      this.notificationService.showSuccess(`Added ${product.name} to cart`);
+    }
+
+    this.updateCartState(updatedItems);
   }
 
   removeFromCart(productId: number): void {
@@ -110,8 +103,8 @@ export class CartService {
       this.removeFromCart(productId);
       return;
     }
-    const updated = this.cartStateSubject.value.items.map((i) =>
-      i.product.id === productId ? { ...i, quantity } : i
+    const updated = this.cartStateSubject.value.items.map((item) =>
+      item.product.id === productId ? { ...item, quantity } : item
     );
     this.updateCartState(updated);
   }
@@ -126,83 +119,84 @@ export class CartService {
   // ----- COUPON OPERATIONS -----
 
   applyCoupon(code: string): Observable<boolean> {
-    this.setLoading(true);
     const total = this.cartStateSubject.value.totalPrice;
     return this.couponService.validateCoupon(code, total).pipe(
-      tap((res: CouponValidationResult) => {
-        if (res.isValid && res.coupon) {
-          const newState = {
-            ...this.cartStateSubject.value,
-            appliedCoupon: res.coupon,
-            lastUpdated: new Date(),
-          };
+      tap((result: CouponValidationResult) => {
+        if (result.isValid && result.coupon) {
           this.cartStateSubject.next({
-            ...newState,
-            discountedPrice: this.calculateDiscountedPrice(newState),
+            ...this.cartStateSubject.value,
+            appliedCoupon: result.coupon,
+            discountedPrice: this.calculateDiscountedPrice({
+              ...this.cartStateSubject.value,
+              appliedCoupon: result.coupon,
+            }),
+            lastUpdated: new Date(),
           });
-          this.notificationService.showSuccess(res.message);
+          this.notificationService.showSuccess(result.message);
         } else {
-          this.notificationService.showError(res.message);
+          this.notificationService.showError(result.message);
         }
       }),
-      map((res) => res.isValid),
+      map((result) => result.isValid),
       catchError(() => {
         this.notificationService.showError('Coupon validation failed');
         return of(false);
-      }),
-      finalize(() => this.setLoading(false))
+      })
     );
   }
 
   removeCoupon(): void {
-    const state = this.cartStateSubject.value;
     const newState = {
-      ...state,
+      ...this.cartStateSubject.value,
       appliedCoupon: undefined,
-      lastUpdated: new Date(),
     };
     this.cartStateSubject.next({
       ...newState,
       discountedPrice: this.calculateDiscountedPrice(newState),
+      lastUpdated: new Date(),
     });
     this.notificationService.showInfo('Coupon removed');
   }
 
   // ----- PRIVATE HELPERS -----
-
+  // Update cart state and trigger notifications
   private updateCartState(items: CartItem[]): void {
     const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
     const totalPrice = items.reduce(
       (sum, i) => sum + i.product.price * i.quantity,
       0
     );
-    const baseState: CartState = {
+
+    const newState: CartState = {
       ...this.cartStateSubject.value,
       items,
       totalItems,
       totalPrice,
-      isLoading: false,
       lastUpdated: new Date(),
     };
-    this.cartStateSubject.next({
-      ...baseState,
-      discountedPrice: this.calculateDiscountedPrice(baseState),
-    });
 
-    // Update cart value alerts whenever cart state changes
+    newState.discountedPrice = this.calculateDiscountedPrice(newState);
+    this.cartStateSubject.next(newState);
+
+    // Trigger alerts
     this.notificationService.updateCartValueAlert(totalPrice);
   }
 
+  // Calculate final price with all discounts
   private calculateDiscountedPrice(state: CartState): number {
     let price = state.totalPrice;
-    state.items.forEach((i) => {
-      if (i.product.discount) {
-        price -= (i.product.price * i.quantity * i.product.discount) / 100;
+    // Apply product discounts
+    state.items.forEach((item) => {
+      if (item.product.discount) {
+        price -=
+          (item.product.price * item.quantity * item.product.discount) / 100;
       }
     });
+    // Apply coupon discount
     if (state.appliedCoupon) {
       price *= 1 - state.appliedCoupon.discountPercent / 100;
     }
+    // Apply membership discount
     const user = this.userService.getCurrentUser();
     if (user) {
       price -= this.userService.calculateMembershipDiscount(
@@ -211,11 +205,6 @@ export class CartService {
       );
     }
     return Math.max(0, price);
-  }
-
-  private setLoading(loading: boolean): void {
-    const curr = this.cartStateSubject.value;
-    this.cartStateSubject.next({ ...curr, isLoading: loading });
   }
 
   private initializeCartMonitoring(): void {
@@ -248,10 +237,6 @@ export class CartService {
 
   private saveCartToStorage(state: CartState): void {
     console.log('Saved cart:', state);
-  }
-
-  private loadCartFromStorage(): void {
-    // load from API/localStorage as needed
   }
 
   // ----- PUBLIC UTILITIES -----

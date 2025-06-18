@@ -1,7 +1,7 @@
 // ========== USER SERVICE ==========
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { User } from '../shopping-cart.models';
+import { User } from '../shopping-cart.utils';
 
 @Injectable({
   providedIn: 'root',

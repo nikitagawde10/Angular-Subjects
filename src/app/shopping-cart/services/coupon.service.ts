@@ -1,7 +1,7 @@
 // ========== COUPON SERVICE ==========
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Coupon } from '../shopping-cart.models';
+import { Coupon, mockCoupons } from '../shopping-cart.utils';
 
 export interface CouponValidationResult {
   isValid: boolean;
@@ -13,26 +13,7 @@ export interface CouponValidationResult {
   providedIn: 'root',
 })
 export class CouponService {
-  private availableCouponsSubject = new BehaviorSubject<Coupon[]>([
-    {
-      code: 'SAVE10',
-      discountPercent: 10,
-      minAmount: 50,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-    },
-    {
-      code: 'MEMBER20',
-      discountPercent: 20,
-      minAmount: 100,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    },
-    {
-      code: 'FREESHIP',
-      discountPercent: 0,
-      minAmount: 75,
-      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
-    },
-  ]);
+  private availableCouponsSubject = new BehaviorSubject<Coupon[]>(mockCoupons);
 
   public availableCoupons$ = this.availableCouponsSubject.asObservable();
 

@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, timer } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
-import { NotificationMessage } from '../shopping-cart.models';
+import { NotificationMessage } from '../shopping-cart.utils';
 
 @Injectable({
   providedIn: 'root',

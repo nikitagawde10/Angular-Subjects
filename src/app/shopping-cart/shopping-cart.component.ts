@@ -10,7 +10,8 @@ import {
   NotificationMessage,
   Product,
   CartSummary,
-} from './shopping-cart.models';
+  sampleProducts,
+} from './shopping-cart.utils';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -29,55 +30,7 @@ export class ShoppingCartComponent implements OnInit, OnDestroy {
   notification: NotificationMessage | null = null;
   cartValueAlert = '';
   cartExpiryWarning = '';
-
-  sampleProducts: Product[] = [
-    {
-      id: 1,
-      name: 'Gaming Laptop',
-      price: 999.99,
-      category: 'Electronics',
-      inStock: true,
-    },
-    {
-      id: 2,
-      name: 'Wireless Headphones',
-      price: 199.99,
-      category: 'Electronics',
-      inStock: true,
-      discount: 15,
-    },
-    {
-      id: 3,
-      name: 'Programming Book',
-      price: 29.99,
-      category: 'Books',
-      inStock: true,
-    },
-    {
-      id: 4,
-      name: 'Smart Coffee Maker',
-      price: 89.99,
-      category: 'Appliances',
-      inStock: true,
-      discount: 10,
-    },
-    {
-      id: 5,
-      name: 'Mechanical Keyboard',
-      price: 149.99,
-      category: 'Electronics',
-      inStock: false,
-    },
-    {
-      id: 6,
-      name: 'Desk Chair',
-      price: 299.99,
-      category: 'Furniture',
-      inStock: true,
-      discount: 20,
-    },
-  ];
-
+  products: Product[] = sampleProducts;
   constructor(
     private cartService: CartService,
     private userService: UserService,
