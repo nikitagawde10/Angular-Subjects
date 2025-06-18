@@ -4,7 +4,6 @@ import {
   map,
   debounceTime,
   distinctUntilChanged,
-  filter,
   tap,
   catchError,
   finalize,
@@ -68,6 +67,9 @@ export class CartService {
         };
       })
     );
+
+    // Start cart expiry timer
+    this.startCartExpiryMonitoring();
   }
 
   // ----- CART OPERATIONS -----
@@ -117,6 +119,8 @@ export class CartService {
   clearCart(): void {
     this.updateCartState([]);
     this.notificationService.showInfo('Cart cleared');
+    // Clear all alerts when cart is cleared
+    this.notificationService.clearAllAlerts();
   }
 
   // ----- COUPON OPERATIONS -----
@@ -184,6 +188,9 @@ export class CartService {
       ...baseState,
       discountedPrice: this.calculateDiscountedPrice(baseState),
     });
+
+    // Update cart value alerts whenever cart state changes
+    this.notificationService.updateCartValueAlert(totalPrice);
   }
 
   private calculateDiscountedPrice(state: CartState): number {
@@ -220,6 +227,23 @@ export class CartService {
         )
       )
       .subscribe((state) => this.saveCartToStorage(state));
+  }
+
+  private startCartExpiryMonitoring(): void {
+    // Start the cart expiry timer
+    this.notificationService
+      .startCartExpiryTimer(() => {
+        const items = this.cartStateSubject.value.items;
+        if (items.length === 0) return null;
+
+        // Find the oldest item in the cart
+        const oldestItem = items.reduce((oldest, current) => {
+          return current.addedAt < oldest.addedAt ? current : oldest;
+        });
+
+        return oldestItem.addedAt;
+      })
+      .subscribe(); // Subscribe to start the timer
   }
 
   private saveCartToStorage(state: CartState): void {

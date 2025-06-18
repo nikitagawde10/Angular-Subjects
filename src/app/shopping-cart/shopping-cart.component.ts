@@ -1,4 +1,3 @@
-// ========== REFACTORED SHOPPING CART COMPONENT ==========
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
